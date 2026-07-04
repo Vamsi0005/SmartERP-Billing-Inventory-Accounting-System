@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  password    String
+  phone       String?
+  isActive    Boolean  @default(true)
+  companies   Company[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Company {
+  id             String   @id @default(cuid())
+
+  companyName    String
+  address        String
+  gstNumber      String
+  financialYear  String
+  state          String
+  contactNumber  String
+  isActive       Boolean @default(true)
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customers      Customer[]
+  suppliers      Supplier[]
+  stockItems     StockItem[]
+  purchases      Purchase[]
+  sales          Sale[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Customer {
+  id                 String   @id @default(cuid())
+
+  customerName       String
+  mobileNumber       String
+  address            String
+
+  openingBalance     Float    @default(0)
+
+  companyId          String
+  company            Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sales              Sale[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Supplier {
+  id               String   @id @default(cuid())
+
+  supplierName     String
+  mobileNumber     String
+  address          String
+
+  openingBalance   Float    @default(0)
+
+  companyId        String
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  purchases        Purchase[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model StockItem {
+  id              String   @id @default(cuid())
+
+  itemName        String
+  category        String
+  unit            String
+
+  purchasePrice   Float
+  sellingPrice    Float
+
+  gst             Float
+
+  openingStock    Int
+  minimumStock    Int
+
+  companyId       String
+  company         Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  purchases       Purchase[]
+  sales           Sale[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Purchase {
+  id             String    @id @default(cuid())
+
+  supplierId     String
+  supplier       Supplier  @relation(fields: [supplierId], references: [id])
+
+  stockItemId    String
+  stockItem      StockItem @relation(fields: [stockItemId], references: [id])
+
+  quantity       Int
+  purchasePrice  Float
+  gst            Float
+  totalAmount    Float
+
+  purchaseDate   DateTime  @default(now())
+
+  companyId      String
+  company        Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Sale {
+  id            String     @id @default(cuid())
+
+  customerId    String
+  customer      Customer   @relation(fields: [customerId], references: [id])
+
+  stockItemId   String
+  stockItem     StockItem  @relation(fields: [stockItemId], references: [id])
+
+  quantity      Int
+  sellingPrice  Float
+  gst           Float
+  totalAmount   Float
+
+  saleDate      DateTime   @default(now())
+
+  companyId     String
+  company       Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
