@@ -354,7 +354,7 @@ Available reports:
 
 # 👨‍💻 Developer
 
-**Vamsi Krishna**
+**Vamsi Salla**
 
 MCA Graduate | Full Stack MERN Developer
 
